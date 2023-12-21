@@ -5,29 +5,14 @@ from threading import Thread, Lock
 import time
 from waitress import serve
 import os
+import sys
 
-# Function to scan and select the video source
-def select_camera():
-    max_cameras = 10
-    available_cameras = []
-    for i in range(max_cameras):
-        cap = cv2.VideoCapture(i)
-        if cap.read()[0]:
-            available_cameras.append(i)
-            cap.release()
+# Accepting the camera index from command line
+if len(sys.argv) != 2:
+    print("Usage: python script_name.py <camera_index>")
+    sys.exit(1)
 
-    if not available_cameras:
-        raise Exception("No cameras found.")
-
-    print("Available cameras:", available_cameras)
-    camera_index = int(input("Select camera index: "))
-    if camera_index not in available_cameras:
-        raise ValueError(f"Invalid camera index: {camera_index}")
-
-    return camera_index
-
-# Call the camera selection function before starting the server
-camera_index = select_camera()
+camera_index = int(sys.argv[1])
 
 os.system('cls')
 print(r"""
@@ -46,7 +31,7 @@ app = Flask(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Global camera and lock for thread safety
-camera = cv2.VideoCapture(0)
+camera = cv2.VideoCapture(camera_index)  # Use the provided device index
 camera_lock = Lock()
 
 def gen_frames(): 
